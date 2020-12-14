@@ -3,44 +3,90 @@ package main
 import (
 	"context"
 	"log"
+	"strconv"
 
 	// "os"
+
+	db "api/database"
+	models "api/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var client *mongo.Client
-type Cube struct {
-	Currency  string `bson:"currency"`
-	Rate string `bson:"rate"`
-}
-type Cubes struct{
-	ID        primitive.ObjectID           `bson:"_id"`
-	Time      string                       `bson:"time"`
-	Cubes 	[]Cube 				    `bson:"Cube"`
-}
+
+
 func main() {
-
 	router := gin.Default()
+	
+	router.GET("/newest-rates",func (c *gin.Context){
+		cubeCollection := db.Connector
+		var Cubes []models.Cubes
+		var DateCubes models.DateCubes
+		data,_ := cubeCollection.Find(context.Background(),bson.M{})
+		defer data.Close(context.Background())
+		error := data.All(context.Background(),&Cubes)
+		if error != nil {
+			log.Fatal(error)
+		}
+		rateResult := make(map[string]float64)
+		for _,cubes := range Cubes {
+			DateCubes.Date = cubes.Time
+			for _,cube := range cubes.Cubes {
+				s, _ := strconv.ParseFloat(cube.Rate, 64)
+				rateResult[cube.Currency] = s
+				DateCubes.Rates = rateResult
+			}
+		}
+		c.JSON(http.StatusOK, DateCubes)
+	})
+	router.GET("/random-rates",func (c *gin.Context){
+		cubeCollection := db.Connector
+		var Cubes []models.Cubes
+		var DateCubes models.DateCubes
+		data,_ := cubeCollection.Find(context.Background(),bson.M{"time" : "2020-12-10"})
+		defer data.Close(context.Background())
+		error := data.All(context.Background(),&Cubes)
+		if error != nil {
+			log.Fatal(error)
+		}
+		rateResult := make(map[string]float64)
+		for _,cubes := range Cubes {
+			DateCubes.Date = cubes.Time
+			for _,cube := range cubes.Cubes {
+				s, _ := strconv.ParseFloat(cube.Rate, 64)
+				rateResult[cube.Currency] = s
+			
+				DateCubes.Rates = rateResult
+			}
+		}
+		c.JSON(http.StatusOK, DateCubes)
+	})
+	router.GET("/value-per-currency",func (c *gin.Context){
+		cubeCollection := db.Connector
+		var Cubes []models.Cubes
+		var dateCubes models.DateCubes
+		allcubes := make([]models.DateCubes,0)
 
-	router.GET("/newest-rates",newestRateFunc)
-
+		data,_ := cubeCollection.Find(context.Background(),bson.M{})
+		defer data.Close(context.Background())
+		error := data.All(context.Background(),&Cubes)
+		if error != nil {
+			log.Fatal(error)
+		}
+		rateResult := make(map[string]float64)
+		for _,cubes := range Cubes {
+			dateCubes.Date = cubes.Time
+			for _,cube := range cubes.Cubes {
+				s, _ := strconv.ParseFloat(cube.Rate, 64)
+				rateResult[cube.Currency] = s
+			
+				dateCubes.Rates = rateResult
+			}
+			allcubes = append(allcubes,dateCubes)
+		}
+		c.JSON(http.StatusOK, allcubes)
+	})
 	router.Run(":8080")
-}
-
-
-func newestRateFunc(c *gin.Context){
-	cubeCollection := db.ConnectCubes();
-	var Cubes []Cubes
-	data,_ := cubeCollection.Find(context.Background(),bson.M{})
-	defer data.Close(context.Background())
-	error := data.All(context.Background(),&Cubes)
-	if error != nil {
-		log.Fatal(error)
-	}
-	c.JSON(http.StatusOK, Cubes)
 }
