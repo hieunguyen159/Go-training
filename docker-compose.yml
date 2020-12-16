@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: CompileDaemon -log-prefix=false -build="go build -o main" -command="./main"
+    env_file: ./.env
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    networks: 
+      - default
+  mongodb:
+    image: "mongo"
