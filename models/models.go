@@ -1,35 +1,37 @@
 package models
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-type Time struct {
-	Time string
-}
 type Cube struct {
-	Currency  string `bson:"currency"`
-	Rate string `bson:"rate"`
-}
-type Cubes struct{
-	ID        primitive.ObjectID           `bson:"_id"`
-	Time      string                       `bson:"time"`
-	Cubes 	[]Cube 				    `bson:"Cube"`
+	Currency string `xml:"currency,attr" bson:"currency"`
+	Rate     float64 `xml:"rate,attr" bson:"rate"`
 }
 
-type DateCubes struct {
+type Cubes struct {
+	Time   string `xml:"time,attr" bson:"time"`
+	Cubes []Cube	`xml:"Cube" bson:"Cube"`
+}
+
+type BigCube struct {
+	BigCube []Cubes `xml:"Cube"`
+}
+type Envelope struct {
+	Envelope BigCube `xml:"Cube"`
+}
+type DateCube struct {
 	Date string
 	Rates map[string]float64
 }
-type BigCubes struct {
-	Rates map[string]float64
+
+type Time struct {
+	Time string
 }
 
 type ValuePerCurrency struct {
-	Currency string
-	MinPerCurrency float64
-	MaxPerCurrency float64
-	AveragePerCurrency float64
+	Currency []string `bson:"_id" json:"currency"`
+	/*MinPerCurrency float64 `bson:"min" json:"minPerCurrency"`
+	MaxPerCurrency float64 `bson:"max" json:"maxPerCurrency"`
+	AveragePerCurrency float64 `bson:"avg" json:"averagePerCurrency"`*/
 }
-type Info struct {
-	Info []ValuePerCurrency
+
+type All struct {
+	All []ValuePerCurrency
 }

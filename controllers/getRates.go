@@ -2,10 +2,8 @@ package controllers
 
 import (
 	"context"
-	"fmt"
+	"github.com/gin-gonic/gin/binding"
 	"log"
-	"strconv"
-
 	// "os"
 
 	db "api/database"
@@ -13,38 +11,36 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/bson"
 )
-func GetNewestRates(c *gin.Context){
+
+func GetNewestRates(c *gin.Context) {
 	cubeCollection := db.Connector
 	var Cubes []models.Cubes
-	var dateCubes models.DateCubes
-	data,_ := cubeCollection.Find(context.Background(),bson.M{})
-	allcubes := make([]models.DateCubes,0)
+	var dateCubes models.DateCube
+	data, _ := cubeCollection.Find(context.Background(), bson.M{})
 	defer data.Close(context.Background())
-	error := data.All(context.Background(),&Cubes)
+	error := data.All(context.Background(), &Cubes)
 	if error != nil {
 		log.Fatal(error)
 	}
+
 	rateResult := make(map[string]float64)
-	for _,cubes := range Cubes {
+	allCubes := make([]models.DateCube, 0)
+	for _, cubes := range Cubes {
 		dateCubes.Date = cubes.Time
-		for _,cube := range cubes.Cubes {
-			s, _ := strconv.ParseFloat(cube.Rate, 64)
-			rateResult[cube.Currency] = s
-		
+		for _, cube := range cubes.Cubes {
+			rateResult[cube.Currency] = cube.Rate
+
 			dateCubes.Rates = rateResult
 		}
-		allcubes = append(allcubes,dateCubes)
+		allCubes = append(allCubes, dateCubes)
 	}
 
-
-
-	c.JSON(http.StatusOK, allcubes[0])
+	c.JSON(http.StatusOK, allCubes)
 }
 
-func GetRandomRates(c *gin.Context){
+func GetRandomRates(c *gin.Context) {
 	cubeCollection := db.Connector
 	var time models.Time
 	if err := c.ShouldBindBodyWith(&time, binding.JSON); err != nil {
@@ -52,20 +48,19 @@ func GetRandomRates(c *gin.Context){
 	}
 	if time.Time != "" {
 		var Cubes []models.Cubes
-		var DateCubes models.DateCubes
-		data,_ := cubeCollection.Find(context.Background(),bson.M{"time" : time.Time})
+		var DateCubes models.DateCube
+		data, _ := cubeCollection.Find(context.Background(), bson.M{"time": time.Time})
 		defer data.Close(context.Background())
-		error := data.All(context.Background(),&Cubes)
+		error := data.All(context.Background(), &Cubes)
 		if error != nil {
 			log.Fatal(error)
 		}
 		rateResult := make(map[string]float64)
-		for _,cubes := range Cubes {
+		for _, cubes := range Cubes {
 			DateCubes.Date = cubes.Time
-			for _,cube := range cubes.Cubes {
-				s, _ := strconv.ParseFloat(cube.Rate, 64)
-				rateResult[cube.Currency] = s
-			
+			for _, cube := range cubes.Cubes {
+				rateResult[cube.Currency] = cube.Rate
+
 				DateCubes.Rates = rateResult
 			}
 		}
@@ -73,46 +68,39 @@ func GetRandomRates(c *gin.Context){
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Pass body please"})
 	}
-	
-} 
 
-func GetPropertyOfAll(c *gin.Context){
+}
+
+func GetPropertyOfAll(c *gin.Context) {
 	cubeCollection := db.Connector
-	var Cubes []models.Cubes
-	var dateCubes models.BigCubes
-	
-	allcubes := make([]models.BigCubes,0)
+	//var Cubes []models.Cubes
+	//var dateCubes models.BigCubes
+	//var currencyInfo models.ValuePerCurrency
+	matchStage := bson.M{"$match": bson.M{}}
+	groupStage := bson.M{
+		"$group": bson.M{
+			"_id": "$Cube.currency",
+			"max": bson.M{
+				"$max": "$Cube.rate",
+			},
+			"min": bson.M{
+				"$min": "$Cube.rate",
+			},
+			"avg": bson.M{
+				"$avg": "$Cube.rate",
+			}},
+	}
 
-	data,_ := cubeCollection.Find(context.Background(),bson.M{})
-	defer data.Close(context.Background())
-	error := data.All(context.Background(),&Cubes)
-	if error != nil {
-		log.Fatal(error)
+
+	getDataCubeCusor, err := cubeCollection.Aggregate(context.Background(), []bson.M{matchStage, groupStage})
+	if err != nil {
+		panic(err)
 	}
-	rateResult := make(map[string]float64)
-	
-	for _,cubes := range Cubes {
-		for _,cube := range cubes.Cubes {
-			s, _ := strconv.ParseFloat(cube.Rate, 64)
-			rateResult[cube.Currency] = s
-			dateCubes.Rates = rateResult
-			}
-			allcubes = append(allcubes, dateCubes)
-		}
-	// var max float64 = 0
-	var valueCurrency models.ValuePerCurrency
-	infoCurrency := make([]models.ValuePerCurrency,0)
-	// var infoCurrency []models.ValuePerCurrency
-	for i := 0; i < len(allcubes) -1; i++ {
-		for k,v := range allcubes[i].Rates {
-			fmt.Println(k, v)
-			valueCurrency.Currency = k
-			valueCurrency.MaxPerCurrency = v
-			valueCurrency.MinPerCurrency = v
-			valueCurrency.AveragePerCurrency = v
-		}
-		infoCurrency.append(infoCurrency,valueCurrency)
+	var getDataCube []bson.M
+	if err = getDataCubeCusor.All(context.Background(), &getDataCube); err != nil {
+		panic(err)
 	}
-	fmt.Println(infoCurrency)
-	c.JSON(http.StatusOK, valueCurrency)
+	log.Println("log:",getDataCube)
+
+	c.JSON(http.StatusOK, getDataCube)
 }
