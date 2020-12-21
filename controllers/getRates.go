@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"context"
-	"github.com/gin-gonic/gin/binding"
 	"log"
-	// "os"
+
+	"github.com/gin-gonic/gin/binding"
 
 	db "api/database"
 	models "api/models"
