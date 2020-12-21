@@ -18,7 +18,7 @@ func main() {
 	db.GetXMLfile()
 	c := cron.New()
 	c.Start()
-	c.AddFunc("@every 0h0m1s", db.AddDataDaily)
+	c.AddFunc("@daily", db.AddDataDaily)
 
 	router.Run(":8081")
 }
