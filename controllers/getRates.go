@@ -37,7 +37,7 @@ func GetNewestRates(c *gin.Context) {
 		allCubes = append(allCubes, dateCubes)
 	}
 
-	c.JSON(http.StatusOK, allCubes)
+	c.JSON(http.StatusOK, allCubes[0])
 }
 
 func GetRandomRates(c *gin.Context) {
@@ -73,10 +73,7 @@ func GetRandomRates(c *gin.Context) {
 
 func GetPropertyOfAll(c *gin.Context) {
 	cubeCollection := db.Connector
-	//var Cubes []models.Cubes
-	//var dateCubes models.BigCubes
-	//var currencyInfo models.ValuePerCurrency
-	matchStage := bson.M{"$match": bson.M{}}
+	matchStage := bson.M{"$unwind": "$Cube"}
 	groupStage := bson.M{
 		"$group": bson.M{
 			"_id": "$Cube.currency",
@@ -90,17 +87,13 @@ func GetPropertyOfAll(c *gin.Context) {
 				"$avg": "$Cube.rate",
 			}},
 	}
-
-
 	getDataCubeCusor, err := cubeCollection.Aggregate(context.Background(), []bson.M{matchStage, groupStage})
 	if err != nil {
 		panic(err)
 	}
-	var getDataCube []bson.M
+	var getDataCube []models.ValuePerCurrency
 	if err = getDataCubeCusor.All(context.Background(), &getDataCube); err != nil {
 		panic(err)
 	}
-	log.Println("log:",getDataCube)
-
 	c.JSON(http.StatusOK, getDataCube)
 }

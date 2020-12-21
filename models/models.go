@@ -1,8 +1,8 @@
 package models
 
 type Cube struct {
-	Currency string `xml:"currency,attr" bson:"currency"`
-	Rate     float64 `xml:"rate,attr" bson:"rate"`
+	Currency string `xml:"currency,attr" bson:"currency" json:"currency"`
+	Rate     float64 `xml:"rate,attr" bson:"rate" json:"rate"`
 }
 
 type Cubes struct {
@@ -17,8 +17,8 @@ type Envelope struct {
 	Envelope BigCube `xml:"Cube"`
 }
 type DateCube struct {
-	Date string
-	Rates map[string]float64
+	Date string `json:"time"`
+	Rates map[string]float64 `json:"rates"`
 }
 
 type Time struct {
@@ -26,12 +26,9 @@ type Time struct {
 }
 
 type ValuePerCurrency struct {
-	Currency []string `bson:"_id" json:"currency"`
-	/*MinPerCurrency float64 `bson:"min" json:"minPerCurrency"`
+	Currency string `bson:"_id" json:"currency"`
+	MinPerCurrency float64 `bson:"min" json:"minPerCurrency"`
 	MaxPerCurrency float64 `bson:"max" json:"maxPerCurrency"`
-	AveragePerCurrency float64 `bson:"avg" json:"averagePerCurrency"`*/
+	AveragePerCurrency float64 `bson:"avg" json:"averagePerCurrency"`
 }
 
-type All struct {
-	All []ValuePerCurrency
-}

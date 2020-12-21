@@ -6,24 +6,30 @@ import (
 	"api/models"
 	"context"
 	"encoding/xml"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"gopkg.in/robfig/cron.v2"
 )
 
 func main() {
+
 	router := gin.Default()
-	
-	router.GET("/newest-rates",ctrl.GetNewestRates)
-	router.POST("/random-rates",ctrl.GetRandomRates)
-	router.GET("/value-per-currency",ctrl.GetPropertyOfAll)
+
+	router.GET("/newest-rates", ctrl.GetNewestRates)
+	router.POST("/random-rates", ctrl.GetRandomRates)
+	router.GET("/value-per-currency", ctrl.GetPropertyOfAll)
 	GetXMLfile()
-	router.Run(":8081")
+	router.Run(":8080")
+	c := cron.New()
+	c.AddFunc("@hourly", GetXMLfile)
+	c.Start()
+	c.Stop()
 }
 
 func GetXMLfile() {
-	resp,err := http.Get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml")
-	//log.Println(resp)
+	resp, err := http.Get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml")
 	if err != nil {
 		log.Println(err)
 	}
@@ -34,8 +40,11 @@ func GetXMLfile() {
 	}
 
 	var ui []interface{}
-	for _, t := range envelope.Envelope.BigCube{
-		ui = append(ui, t)
+	for _, t := range envelope.Envelope.BigCube {
+		if t.Time == "2020-12-04" {
+			ui = append(ui, t)
+		}
+
 	}
-	db.Connector.InsertMany(context.Background(),ui)
+	db.Connector.InsertMany(context.Background(), ui)
 }
