@@ -31,3 +31,12 @@ type ValuePerCurrency struct {
 	MaxPerCurrency     float64 `bson:"max" json:"maxPerCurrency"`
 	AveragePerCurrency float64 `bson:"avg" json:"averagePerCurrency"`
 }
+
+type Form struct {
+	Email    string   `json:"email"`
+	Receiver []string `json:"receiver"`
+}
+type Email struct {
+	Email  string `json:"email" bson:"email"`
+	Status string `json:"status" bson:"status"`
+}

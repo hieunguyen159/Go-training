@@ -9,9 +9,14 @@ services:
     env_file: ./.env
     ports:
       - "8080:8080"
-    networks: 
+    networks:
       - default
     volumes:
       - .:/app
   mongodb:
     image: "mongo"
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui

@@ -21,12 +21,9 @@ func GetXMLfile() {
 	if err = xml.NewDecoder(resp.Body).Decode(&envelope); err != nil {
 		log.Println(err)
 	}
-	if err = Connector.Drop(context.Background()); err != nil {
-		log.Fatal(err)
-	}
 	var ui interface{}
 	for _, t := range envelope.Envelope.BigCube {
-		if t.Time == "2020-09-21" {
+		if t.Time == "2020-09-29" {
 			ui = t
 		}
 	}

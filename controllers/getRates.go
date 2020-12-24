@@ -49,9 +49,9 @@ func GetRandomRates(c *gin.Context) {
 	if time.Time != "" {
 		var Cubes []models.Cubes
 		var DateCubes models.DateCube
-		data, _ := cubeCollection.Find(context.Background(), bson.M{"time": time.Time})
-		defer data.Close(context.Background())
-		error := data.All(context.Background(), &Cubes)
+		data, _ := cubeCollection.Find(context.TODO(), bson.M{"time": time.Time})
+		defer data.Close(context.TODO())
+		error := data.All(context.TODO(), &Cubes)
 		if error != nil {
 			log.Fatal(error)
 		}
@@ -96,4 +96,30 @@ func GetPropertyOfAll(c *gin.Context) {
 		panic(err)
 	}
 	c.JSON(http.StatusOK, getDataCube)
+}
+func GetNewest(c *gin.Context) models.DateCube {
+	cubeCollection := db.Connector
+	var Cubes []models.Cubes
+	var dateCubes models.DateCube
+	data, _ := cubeCollection.Find(context.Background(), bson.M{})
+	defer data.Close(context.Background())
+	error := data.All(context.Background(), &Cubes)
+	if error != nil {
+		log.Fatal(error)
+	}
+
+	rateResult := make(map[string]float64)
+	allCubes := make([]models.DateCube, 0)
+	for _, cubes := range Cubes {
+		dateCubes.Date = cubes.Time
+		for _, cube := range cubes.Cubes {
+			rateResult[cube.Currency] = cube.Rate
+
+			dateCubes.Rates = rateResult
+		}
+		allCubes = append(allCubes, dateCubes)
+	}
+
+	c.JSON(http.StatusOK, allCubes[0])
+	return allCubes[0]
 }
