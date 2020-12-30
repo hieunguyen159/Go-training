@@ -1,97 +1,156 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { connect, sendMsg } from "./socket";
+import { makeStyles } from "@material-ui/core/styles";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import Button from "@material-ui/core/Button";
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
+import "./App.css";
+import sendMailApi from "./api/mails";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "30%",
+    "& > * + *": {
+      marginTop: 10,
+    },
+    padding: 30,
+  },
+}));
+var socket = new WebSocket("ws://localhost:8080/ws");
 export default function App() {
   const [email, setEmail] = useState("");
-  const [receiver1, setReceiver1] = useState("");
-  const [receiver2, setReceiver2] = useState("");
-  const [receiver3, setReceiver3] = useState("");
+  const [receiver, setReceiver] = useState([""]);
   const [loading, setLoading] = useState(false);
+  const [emailList, setEmailList] = useState([]);
+  const [mess, setMess] = useState([]);
+  console.log("sent:", receiver);
 
-  useEffect(() => connect(), []);
-  const hello = () => {
-    sendMsg("Hello from Client");
-  };
-  const sendMail = async () => {
-    try {
-      var receiver = [];
-      receiver.push(receiver1);
-      receiver.push(receiver2);
-      receiver.push(receiver3);
-      console.log("receiver", receiver);
+  const classes = useStyles();
 
-      setLoading(true);
-      const res = await axios.post("http://localhost:8080/mail/send-all", {
-        email,
-        receiver,
+  useEffect(() => {
+    console.log("Attempting Connection...");
+    socket.onopen = () => {
+      console.log("Successfully Connected");
+    };
+    socket.onmessage = (msg) => {
+      console.log("on message: ", msg.data);
+      let data = JSON.parse(msg.data);
+      setMess(data);
+    };
+    socket.onerror = (error) => {
+      console.log("Socket Error: ", error);
+    };
+    return () =>
+      (socket.onclose = (event) => {
+        console.log("Socket Closed Connection: ", event);
       });
-      setLoading(false);
-      console.log(res);
-      return res.data;
+  }, []);
+
+  useEffect(() => {
+    let listClone = [...emailList];
+    for (let i = 0; i < listClone.length; i++) {
+      if (listClone[i].id.trim() === mess[i].id.trim()) {
+        let changeItem = {
+          ...listClone[i],
+          status: "done",
+        };
+        listClone[i] = changeItem;
+      }
+      setEmailList(listClone);
+    }
+  }, [mess]);
+
+  const sendMailToUsers = async () => {
+    try {
+      setEmailList([]);
+      setLoading(true);
+      const fetchEmailList = async () => {
+        const res = await sendMailApi.sendMail(email, receiver);
+        setEmailList(res);
+        setLoading(false);
+      };
+      fetchEmailList();
     } catch (e) {
       setLoading(false);
       console.log(e);
     }
   };
-
+  const onChangeText = (e, i) => {
+    const receiversValues = [...receiver];
+    receiversValues[i] = e.target.value;
+    setReceiver(receiversValues);
+  };
+  const onFieldAdded = () => {
+    const inputField = [...receiver];
+    inputField.push("");
+    setReceiver(inputField);
+  };
   return (
-    <div style={{ textAlign: "center" }}>
-      <div>
+    <div className="App">
+      <div className="from--area">
         <h1>Send Email</h1>
-        <div>
-          <p>
-            <label>From: </label>
-          </p>
-          <input
-            style={{ padding: 10 }}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            name="email"
-            value={email}
-            placeholder="Enter email..."
-          />
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <p>
-            <label>To: </label>
-          </p>
-          <input
-            style={{ padding: 10 }}
-            onChange={(e) => setReceiver1(e.target.value)}
-            type="email"
-            name="receiver"
-            value={receiver1}
-            placeholder="Enter receiver..."
-          />
-          <input
-            style={{ padding: 10 }}
-            onChange={(e) => setReceiver2(e.target.value)}
-            type="email"
-            name="receiver"
-            value={receiver2}
-            placeholder="Enter receiver..."
-          />
-          <input
-            style={{ padding: 10 }}
-            onChange={(e) => setReceiver3(e.target.value)}
-            type="email"
-            name="receiver"
-            value={receiver3}
-            placeholder="Enter receiver..."
-          />
-        </div>
-        <button style={{ marginTop: 20 }} onClick={sendMail}>
-          Send mail
-        </button>
-        {loading && "Loading..."}
+        <p>
+          <label>From: </label>
+        </p>
 
-        <button onClick={hello}>Say hello to backend server</button>
+        <input
+          style={{ padding: 10 }}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          name="email"
+          value={email}
+          placeholder="Enter email..."
+        />
+        <Button
+          style={{ marginTop: 20 }}
+          variant="contained"
+          color="primary"
+          onClick={sendMailToUsers}
+          disabled={loading}
+        >
+          Send mail
+        </Button>
+        <Fab
+          className="fab-button"
+          color="primary"
+          aria-label="add"
+          onClick={onFieldAdded}
+        >
+          <AddIcon />
+        </Fab>
+        {loading && (
+          <div className={classes.root}>
+            <LinearProgress color="secondary" />
+          </div>
+        )}
+        <div className="email-list-container">
+          {emailList.length > 0 &&
+            emailList.map((e, i) => (
+              <p
+                key={i}
+                style={{ color: e.status === "done" ? "green" : "red" }}
+              >
+                Email: {e.email} - Status: {e.status}
+              </p>
+            ))}
+        </div>
+      </div>
+      <div className="to--area">
+        <p>
+          <label>To: </label>
+        </p>
+        {receiver.map((input, i) => (
+          <input
+            key={i}
+            disabled={loading}
+            style={{ padding: 10, margin: "10px 0" }}
+            onChange={(e) => onChangeText(e, i)}
+            type="email"
+            name={i}
+            value={receiver[i]}
+            placeholder="Enter receiver..."
+          />
+        ))}
       </div>
     </div>
   );
