@@ -17,7 +17,7 @@ func main() {
 	router.Use(cors.Default())
 
 	router.GET("/newest-rates", ctrl.GetNewestRates)
-	// router.POST("/random-rates", ctrl.GetRandomRates)
+	router.POST("/random-rates", ctrl.GetRandomRates)
 	router.GET("/value-per-currency", ctrl.GetPropertyOfAll)
 	router.GET("/ws", socket.Echo)
 	router.POST("/mail/send-all", ctrl.SendToAllUser)

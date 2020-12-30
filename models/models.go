@@ -1,5 +1,7 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Cube struct {
 	Currency string  `xml:"currency,attr" bson:"currency" json:"currency"`
 	Rate     float64 `xml:"rate,attr" bson:"rate" json:"rate"`
@@ -37,6 +39,16 @@ type Form struct {
 	Receiver []string `json:"receiver"`
 }
 type Email struct {
-	Email  string `json:"email" bson:"email"`
-	Status string `json:"status" bson:"status"`
+	ID     primitive.ObjectID `json:"id" bson:"_id"`
+	Email  string             `json:"email" bson:"email"`
+	Status string             `json:"status" bson:"status"`
+}
+
+func NewEmailBSon(e string) Email {
+	return Email{
+		ID:     primitive.NewObjectID(),
+		Email:  e,
+		Status: "waiting",
+	}
+
 }

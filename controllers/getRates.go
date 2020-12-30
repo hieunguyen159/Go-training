@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetNewestRates(c *gin.Context) {
+func NewestRates() models.DateCube {
 	cubeCollection := db.Connector
 	var Cubes []models.Cubes
 	var dateCubes models.DateCube
@@ -36,8 +36,32 @@ func GetNewestRates(c *gin.Context) {
 		}
 		allCubes = append(allCubes, dateCubes)
 	}
+	return allCubes[0]
+}
+func GetNewestRates(c *gin.Context) {
+	// cubeCollection := db.Connector
+	// var Cubes []models.Cubes
+	// var dateCubes models.DateCube
+	// data, _ := cubeCollection.Find(context.Background(), bson.M{})
+	// defer data.Close(context.Background())
+	// error := data.All(context.Background(), &Cubes)
+	// if error != nil {
+	// 	log.Fatal(error)
+	// }
 
-	c.JSON(http.StatusOK, allCubes[0])
+	// rateResult := make(map[string]float64)
+	// allCubes := make([]models.DateCube, 0)
+	// for _, cubes := range Cubes {
+	// 	dateCubes.Date = cubes.Time
+	// 	for _, cube := range cubes.Cubes {
+	// 		rateResult[cube.Currency] = cube.Rate
+
+	// 		dateCubes.Rates = rateResult
+	// 	}
+	// 	allCubes = append(allCubes, dateCubes)
+	// }
+
+	c.JSON(http.StatusOK, NewestRates())
 }
 
 func GetRandomRates(c *gin.Context) {
@@ -119,7 +143,6 @@ func GetNewest(c *gin.Context) models.DateCube {
 		}
 		allCubes = append(allCubes, dateCubes)
 	}
-
 	c.JSON(http.StatusOK, allCubes[0])
 	return allCubes[0]
 }

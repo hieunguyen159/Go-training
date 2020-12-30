@@ -1,12 +1,17 @@
 package websocket
 
 import (
+	"api/models"
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
+
+var SocketConn *websocket.Conn
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -16,20 +21,18 @@ var upgrader = websocket.Upgrader{
 
 func Echo(c *gin.Context) {
 	conn, _ := upgrader.Upgrade(c.Writer, c.Request, nil) // error ignored for sake of simplicity
-
+	SocketConn = conn
 	for {
 		// Read message from browser
-		msgType, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			return
+			log.Println(err)
 		}
-
 		// Print the message to the console
 		fmt.Printf("%s sent: %s\n", conn.RemoteAddr(), string(msg))
-
-		// Write message back to browser
-		if err = conn.WriteMessage(msgType, msg); err != nil {
-			return
-		}
 	}
+}
+func PushMessage(e []models.Email) {
+	byteEmail, _ := json.Marshal(e)
+	SocketConn.WriteMessage(1, byteEmail)
 }

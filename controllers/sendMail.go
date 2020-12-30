@@ -4,6 +4,7 @@ import (
 	db "api/database"
 	helpers "api/helpers"
 	models "api/models"
+	socket "api/websocket"
 	"context"
 	"crypto/tls"
 	"log"
@@ -17,39 +18,32 @@ import (
 )
 
 func SendToAllUser(c *gin.Context) {
+	latestCubes := NewestRates()
 	emailCollection := db.ConnectorEmails
+	emailCollection.Drop(context.TODO())
+
 	var form models.Form
 	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
 		log.Printf("%+v", err)
 	}
-	latestCubes := GetNewest(c)
+
 	m := gomail.NewMessage()
-	var email models.Email
 
 	recipients := form.Receiver
-
-	for _, receiver := range recipients {
-		email.Email = receiver
-		email.Status = "waiting"
+	allEmails := make([]models.Email, 0)
+	socketEmails := make([]models.Email, len(recipients))
+	for i, receiver := range recipients {
+		email := models.NewEmailBSon(receiver)
+		log.Println(email.ID)
 		res, _ := emailCollection.InsertOne(context.Background(), email)
 		id := res.InsertedID
-		go SendMail(emailCollection, form, receiver, latestCubes, m, id)
-
-		var userEmailSent []models.Email
-		emails, _ := emailCollection.Find(context.Background(), bson.M{})
-		defer emails.Close(context.Background())
-		emails.All(context.Background(), &userEmailSent)
-		allEmails := make([]models.Email, 0)
-		for _, user := range userEmailSent {
-			allEmails = append(allEmails, user)
-		}
-
+		allEmails = append(allEmails, email)
+		go SendMail(email, emailCollection, form, receiver, latestCubes, m, id, i, socketEmails)
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"status": "OK",
-	})
+	c.JSON(http.StatusOK, allEmails)
+
 }
-func SendMail(emailCollection *mongo.Collection, form models.Form, receiver string, latestCubes models.DateCube, m *gomail.Message, id interface{}) {
+func SendMail(email models.Email, emailCollection *mongo.Collection, form models.Form, receiver string, latestCubes models.DateCube, m *gomail.Message, id interface{}, i int, socketEmails []models.Email) {
 	m.SetHeader("From", form.Email)
 	m.SetHeader("To", receiver)
 	m.SetHeader("Subject", "Ahehehehe")
@@ -61,5 +55,11 @@ func SendMail(emailCollection *mongo.Collection, form models.Form, receiver stri
 	if err := d.DialAndSend(m); err != nil {
 		panic(err)
 	}
-	emailCollection.UpdateOne(context.Background(), bson.M{"_id": id}, bson.M{"$set": bson.M{"status": "done"}})
+	_, err := emailCollection.UpdateOne(context.Background(), bson.M{"_id": id}, bson.M{"$set": bson.M{"status": "done"}})
+	if err == nil {
+		email.Status = "done"
+		socketEmails[i] = email
+		socket.PushMessage(socketEmails)
+	}
+
 }
