@@ -30,6 +30,6 @@ func main() {
 	c := cron.New()
 	c.Start()
 	c.AddFunc("@daily", db.AddDataDaily)
-	c.AddFunc("@every 0h1m", ctrl.SendMailEveryday)
+	c.AddFunc("@daily", ctrl.SendMailEveryday)
 	router.Run(":" + os.Getenv("PORT"))
 }
