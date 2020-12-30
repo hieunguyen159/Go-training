@@ -12,6 +12,27 @@ const sendMail = async (email, receiver) => {
     console.log("error", e);
   }
 };
+const getAllEmails = async () => {
+  try {
+    const res = await axios.get("http://localhost:8080/emails");
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    console.log("error", e);
+  }
+};
+
+const toggleAlert = async (id) => {
+  try {
+    const res = await axios.put("http://localhost:8080/emails/" + id);
+    console.log(res.data);
+    return res.data;
+  } catch (e) {
+    console.log("error", e);
+  }
+};
 export default {
   sendMail,
+  getAllEmails,
+  toggleAlert,
 };

@@ -1,0 +1,24 @@
+.App {
+     display:flex;
+     justify-content: center;
+   }
+   .from--area {
+     flex:1;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+   }
+   .to--area {
+     flex:1;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+   
+   }
+   .table--area {
+     flex:1
+   }
+   .fab-button {
+     margin-top:20px!important
+   }
+   
