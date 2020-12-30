@@ -39,27 +39,6 @@ func NewestRates() models.DateCube {
 	return allCubes[0]
 }
 func GetNewestRates(c *gin.Context) {
-	// cubeCollection := db.Connector
-	// var Cubes []models.Cubes
-	// var dateCubes models.DateCube
-	// data, _ := cubeCollection.Find(context.Background(), bson.M{})
-	// defer data.Close(context.Background())
-	// error := data.All(context.Background(), &Cubes)
-	// if error != nil {
-	// 	log.Fatal(error)
-	// }
-
-	// rateResult := make(map[string]float64)
-	// allCubes := make([]models.DateCube, 0)
-	// for _, cubes := range Cubes {
-	// 	dateCubes.Date = cubes.Time
-	// 	for _, cube := range cubes.Cubes {
-	// 		rateResult[cube.Currency] = cube.Rate
-
-	// 		dateCubes.Rates = rateResult
-	// 	}
-	// 	allCubes = append(allCubes, dateCubes)
-	// }
 
 	c.JSON(http.StatusOK, NewestRates())
 }

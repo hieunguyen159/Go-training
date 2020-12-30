@@ -39,16 +39,18 @@ type Form struct {
 	Receiver []string `json:"receiver"`
 }
 type Email struct {
-	ID     primitive.ObjectID `json:"id" bson:"_id"`
-	Email  string             `json:"email" bson:"email"`
-	Status string             `json:"status" bson:"status"`
+	ID       primitive.ObjectID `json:"id" bson:"_id"`
+	Email    string             `json:"email" bson:"email"`
+	Status   string             `json:"status" bson:"status"`
+	Reminded bool               `json:"reminded" bson:"reminded"`
 }
 
 func NewEmailBSon(e string) Email {
 	return Email{
-		ID:     primitive.NewObjectID(),
-		Email:  e,
-		Status: "waiting",
+		ID:       primitive.NewObjectID(),
+		Email:    e,
+		Status:   "waiting",
+		Reminded: true,
 	}
 
 }

@@ -7,12 +7,16 @@ import (
 	socket "api/websocket"
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	gomail "gopkg.in/mail.v2"
 )
@@ -34,20 +38,20 @@ func SendToAllUser(c *gin.Context) {
 	socketEmails := make([]models.Email, len(recipients))
 	for i, receiver := range recipients {
 		email := models.NewEmailBSon(receiver)
-		log.Println(email.ID)
 		res, _ := emailCollection.InsertOne(context.Background(), email)
 		id := res.InsertedID
 		allEmails = append(allEmails, email)
 		go SendMail(email, emailCollection, form, receiver, latestCubes, m, id, i, socketEmails)
 	}
 	c.JSON(http.StatusOK, allEmails)
-
 }
 func SendMail(email models.Email, emailCollection *mongo.Collection, form models.Form, receiver string, latestCubes models.DateCube, m *gomail.Message, id interface{}, i int, socketEmails []models.Email) {
 	m.SetHeader("From", form.Email)
 	m.SetHeader("To", receiver)
 	m.SetHeader("Subject", "Ahehehehe")
-	m.SetBody("text/plain", helpers.CreateKeyValuePairs(latestCubes.Rates))
+	stringID := id.(primitive.ObjectID).Hex()
+	bodyText := fmt.Sprintf(helpers.CreateKeyValuePairs(latestCubes.Rates)+"Redirect to http://localhost:3000/%s to turn off the alert everyday", stringID)
+	m.SetBody("text/plain", bodyText)
 
 	d := gomail.Dialer{Host: "mailhog", Port: 1025}
 
@@ -60,6 +64,36 @@ func SendMail(email models.Email, emailCollection *mongo.Collection, form models
 		email.Status = "done"
 		socketEmails[i] = email
 		socket.PushMessage(socketEmails)
+	}
+
+}
+
+func SendMailEveryday() {
+	godotenv.Load()
+	var form models.Form
+	var receivers []models.Email
+	var emailsReceivers []string
+	emailCollection := db.ConnectorEmails
+	latestCubes := NewestRates()
+	m := gomail.NewMessage()
+
+	filter := bson.M{"reminded": true}
+	data, err := emailCollection.Find(context.Background(), filter)
+	defer data.Close(context.Background())
+	data.All(context.Background(), &receivers)
+	for _, email := range receivers {
+		emailsReceivers = append(emailsReceivers, email.Email)
+	}
+	socketEmails := make([]models.Email, 0)
+	if err == nil {
+		form.Email = os.Getenv("MAIL")
+		form.Receiver = emailsReceivers
+	}
+	for i, receiver := range emailsReceivers {
+		email := models.NewEmailBSon(receiver)
+		res, _ := emailCollection.InsertOne(context.Background(), email)
+		id := res.InsertedID
+		go SendMail(email, emailCollection, form, receiver, latestCubes, m, id, i, socketEmails)
 	}
 
 }
