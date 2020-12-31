@@ -26,7 +26,7 @@ export default function App() {
   const [emailList, setEmailList] = useState([]);
   const [allEmails, setAllEmails] = useState([]);
   const [mess, setMess] = useState([]);
-  console.log("sent:", receiver);
+  console.log("rec", receiver);
   console.log("mail", allEmails);
 
   const classes = useStyles();
