@@ -1,14 +1,28 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import PrivateRoute from "./guards/PrivateRoute";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
+import { SnackbarProvider } from "notistack";
 import ToggleRemind from "./pages/TogglePage/ToggleRemind";
-import Home from "./pages/Home/Home";
+
+import Login from "./pages/Login";
+import Layouts from "./layouts";
 export default function App() {
   return (
     <Router>
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route exact path="/:id" component={ToggleRemind} />
-      </Switch>
+      <SnackbarProvider maxSnack={3}>
+        <Switch>
+          <Redirect exact from="/" to="/login" />
+          <Route exact path="/login" component={Login} />
+          <PrivateRoute path="/home" component={Layouts} />
+          <Route exact path="/alert/:id" component={ToggleRemind} />
+          <Route path="*" component={() => <div>404 Not Found</div>} />
+        </Switch>
+      </SnackbarProvider>
     </Router>
   );
 }

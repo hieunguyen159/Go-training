@@ -1,0 +1,95 @@
+.root {
+    
+     width:100%;
+     margin: auto;
+     height:100vh;
+     display:flex;
+     justify-content: center;
+     align-items: center;
+     background: rgb(192,197,204);
+background: linear-gradient(180deg, rgba(192,197,204,1) 0%, rgba(103,103,154,1) 39%, rgba(0,212,255,1) 100%);
+}
+.form__area {
+     min-width: 824px;
+     border-radius: 10px;
+     height:80%;
+     display:flex;
+     justify-content: center;
+     align-items: center;
+}
+.form__image--container{
+     flex:1;
+     border-top-left-radius: 10px;
+     border-bottom-left-radius: 10px;
+     height: 100%;
+     background: url("https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjExNzczfQ") no-repeat center fixed ;
+}
+.form__input--wrapper{
+     flex:1;
+     height: 100%;
+     border-top-right-radius: 10px;
+     border-bottom-right-radius: 10px;
+     background-color:white;
+     display:flex;
+     flex-direction: column;
+     justify-content: space-around;
+     align-items: center;
+}
+.form__input--container{
+     display:flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+}
+h2 {
+     margin:10px 0;
+}
+.form__input {
+     background-color:#e0e0e0;
+     margin:10px;
+     padding:5px 20px;
+     border-radius: 999px;
+}
+.form__input--item {
+     background-color:transparent;
+     border:none;
+     padding:10px;
+     outline: none;
+}
+.fas {
+     color:#757575
+}
+.login--button {
+     width:90%;
+     padding:15px;
+     margin:10px 0;
+     border-radius: 999px;
+     background-color: rgb(17, 167, 17);
+     color:white;
+     font-weight: 600;
+     border:none;
+     outline:none;
+     cursor:pointer
+}
+.forgot__link {
+     font-size: 12px;
+     font-weight: 600;
+}
+.forgot-button{
+     border: none;
+     color:rgb(73, 70, 70);
+     cursor: pointer;
+     outline: none;
+}
+a {
+     text-decoration: none;
+     color:grey
+}
+.create__container {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     font-size: 14px;
+     color:rgb(128, 124, 124);
+     cursor:pointer
+}

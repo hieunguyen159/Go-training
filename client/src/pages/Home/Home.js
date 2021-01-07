@@ -6,7 +6,8 @@ import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import "./home.css";
 import sendMailApi from "../../api/mails";
-import DataTable from "../../components/DataTable";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,17 +18,19 @@ const useStyles = makeStyles((theme) => ({
     padding: 30,
   },
 }));
+
 var socket = new WebSocket("ws://localhost:8080/ws");
 export default function App() {
+  let history = useHistory();
+
   const [email, setEmail] = useState("");
   const [receiver, setReceiver] = useState([""]);
   const [loading, setLoading] = useState(false);
-  const [fetchingLoading, setFetchingLoading] = useState(false);
+
   const [emailList, setEmailList] = useState([]);
-  const [allEmails, setAllEmails] = useState([]);
+
   const [mess, setMess] = useState([]);
   console.log("rec", receiver);
-  console.log("mail", allEmails);
 
   const classes = useStyles();
 
@@ -50,15 +53,7 @@ export default function App() {
         console.log("Socket Closed Connection: ", event);
       });
   }, []);
-  // fetch mails
-  useEffect(() => {
-    const fetchMails = async () => {
-      setFetchingLoading(true);
-      setAllEmails(await sendMailApi.getAllEmails());
-      setFetchingLoading(false);
-    };
-    fetchMails();
-  }, [mess]);
+
   // handle real-time sending mails
   useEffect(() => {
     let listClone = [...emailList];
@@ -103,12 +98,22 @@ export default function App() {
     inputField.push("");
     setReceiver(inputField);
   };
+
+ 
   return (
     <div className="App">
+      <Fab
+        className="fab-button"
+        color="primary"
+        aria-label="add"
+        onClick={onFieldAdded}
+      >
+        <AddIcon />
+      </Fab>
       <div className="from--area">
         <h1>Send Email</h1>
         <p>
-          <label>From: </label>
+          <label>Enter your email: </label>
         </p>
         <div style={{ display: "flex", alignItems: "center" }}>
           <input
@@ -134,14 +139,6 @@ export default function App() {
             <LinearProgress color="secondary" />
           </div>
         )}
-        <Fab
-          className="fab-button"
-          color="primary"
-          aria-label="add"
-          onClick={onFieldAdded}
-        >
-          <AddIcon />
-        </Fab>
 
         <div className="email-list-container">
           {emailList &&
@@ -172,9 +169,6 @@ export default function App() {
             placeholder="Enter receiver..."
           />
         ))}
-      </div>
-      <div className="table--area">
-        {allEmails && <DataTable loading={fetchingLoading} data={allEmails} />}
       </div>
     </div>
   );
