@@ -8,3 +8,11 @@ func CheckExist(item string, arr []string) bool {
 	}
 	return false
 }
+func Find(val string, arr []string) (int, bool) {
+	for i, item := range arr {
+	    if item == val {
+		   return i, true
+	    }
+	}
+	return -1, false
+ }

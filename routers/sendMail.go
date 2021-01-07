@@ -24,39 +24,41 @@ import (
 func SendToAllUser(c *gin.Context) {
 	latestCubes := NewestRates()
 	emailCollection := db.ConnectorEmails
-	// emailCollection.Drop(context.TODO())
+	m := gomail.NewMessage()
 
 	var form models.Form
 	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
 		log.Printf("%+v", err)
 	}
+	requestRecipients := form.Receiver
 
-	m := gomail.NewMessage()
-	var existedEmails []models.Email
-
-	data, _ := emailCollection.Find(context.Background(), bson.M{})
-	defer data.Close(context.Background())
-	data.All(context.Background(), &existedEmails)
-
-	recipientsReq := form.Receiver
-	var recipients []string
-	// check exists email in DB
-	if len(existedEmails) > 0 {
-		for _, mailReq := range recipientsReq {
-			for _, mailDB := range existedEmails {
-				if mailReq != mailDB.Email {
-					recipients = append(recipients, mailReq)
-				}
-			}
-		}
-		recipientsReq = recipients
+	var emailsCollectionInDB []models.Email
+	data, err := emailCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return
 	}
-	finalRecipients := helpers.RemoveDuplicate(recipientsReq)
-	log.Println("recipients", finalRecipients)
+	defer data.Close(context.Background())
+	data.All(context.Background(), &emailsCollectionInDB)
+
+	var emailsInDB []string
+	for _,item := range emailsCollectionInDB {
+		emailsInDB = append(emailsInDB,item.Email)
+	}
+	var recipients []string
+	
+	// check exists email in DB
+	for _,email := range requestRecipients {
+		_,found := helpers.Find(email,emailsInDB) 
+		if !found {
+			recipients = append(recipients,email)
+		}
+	}
+
+	log.Println("recipients", recipients)
 	allEmails := make([]models.Email, 0)
-	socketEmails := make([]models.Email, len(finalRecipients))
-	if len(finalRecipients) > 0 {
-		for i, receiver := range finalRecipients {
+	socketEmails := make([]models.Email, len(recipients))
+	if len(recipients) > 0 {
+		for i, receiver := range recipients {
 			email := models.NewEmailBSon(receiver)
 			res, _ := emailCollection.InsertOne(context.Background(), email)
 			id := res.InsertedID

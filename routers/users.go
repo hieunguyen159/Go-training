@@ -62,7 +62,6 @@ func ToggleUser(c *gin.Context) {
 
 func SetRolesUser(c *gin.Context) {
 	roles, err := jwt.ExtractRolesFromToken(c)
-	fmt.Println("roles", roles)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"message": "Internal Server Error"})
@@ -74,18 +73,25 @@ func SetRolesUser(c *gin.Context) {
 		userID := c.Param("id")
 
 		c.ShouldBindBodyWith(&rolesChange, binding.JSON)
-		oid, _ := primitive.ObjectIDFromHex(userID)
-		_, err := usersCollection.UpdateOne(context.Background(), bson.M{"_id": oid}, bson.M{"$set": bson.M{"roles": rolesChange.Roles}})
-		if err == nil {
-			c.JSON(200, gin.H{
-				"message": "Success",
-			})
-			return
+		if len(rolesChange.Roles) > 0 {
+			oid, _ := primitive.ObjectIDFromHex(userID)
+			_, err := usersCollection.UpdateOne(context.Background(), bson.M{"_id": oid}, bson.M{"$set": bson.M{"roles": rolesChange.Roles}})
+			if err == nil {
+				c.JSON(200, gin.H{
+					"message": "Success",
+				})
+				return
+			} else {
+				c.JSON(500, gin.H{
+					"message": "Internal Server Error"})
+				return
+			}
 		} else {
-			c.JSON(500, gin.H{
-				"message": "Internal Server Error"})
+			c.JSON(400, gin.H{
+				"message": "Roles are not empty"})
 			return
 		}
+
 	} else {
 		c.JSON(403, gin.H{
 			"message": "Not permission to access this resource"})

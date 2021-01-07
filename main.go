@@ -6,7 +6,7 @@ import (
 	routers "api/routers"
 	"os"
 	"time"
-
+	socket "api/websocket"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
 	"github.com/joho/godotenv"
@@ -33,7 +33,7 @@ func main() {
 	router.POST("/random-rates", routers.GetRandomRates)
 	router.GET("/value-per-currency", routers.GetPropertyOfAll)
 
-	// router.GET("/ws", socket.Echo)
+	router.GET("/ws", socket.Echo)
 
 	router.POST("/mail/send-all", routers.SendToAllUser)
 	router.GET("/emails", routers.GetAllEmails)
@@ -49,6 +49,6 @@ func main() {
 	c := cron.New()
 	c.Start()
 	c.AddFunc("@daily", db.AddDataDaily)
-	// c.AddFunc("@daily", routers.SendMailEveryday)
+	c.AddFunc("@daily", routers.SendMailEveryday)
 	router.Run(":" + os.Getenv("PORT"))
 }
