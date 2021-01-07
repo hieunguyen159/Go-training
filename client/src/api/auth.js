@@ -25,5 +25,6 @@ export const Register = async (email, password, roles) => {
     return res;
   } catch (e) {
     console.log(e);
+    return e;
   }
 };

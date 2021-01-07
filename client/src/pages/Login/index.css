@@ -38,7 +38,7 @@ background: linear-gradient(180deg, rgba(192,197,204,1) 0%, rgba(103,103,154,1) 
 .form__input--container{
      display:flex;
      flex-direction: column;
-     justify-content: center;
+     justify-content: space-around;
      align-items: center;
 }
 h2 {
@@ -62,9 +62,9 @@ h2 {
 .login--button {
      width:90%;
      padding:15px;
-     margin:10px 0;
-     border-radius: 999px;
-     background-color: rgb(17, 167, 17);
+     margin:20px 0;
+     border-radius: 999px!important;
+     background-color: rgb(17, 167, 17)!important;
      color:white;
      font-weight: 600;
      border:none;

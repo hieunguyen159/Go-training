@@ -135,6 +135,7 @@ export default function DataTable(props) {
                     <TableCell align="center">
                       {row.roles.map((item, index) => (
                         <Chip
+                          color={item === "ADMIN" ? "secondary" : "primary"}
                           style={{ margin: "0 10px" }}
                           key={index}
                           label={item}

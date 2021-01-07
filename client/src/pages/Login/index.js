@@ -6,13 +6,14 @@ import { useHistory } from "react-router-dom";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import { Redirect } from "react-router-dom";
+import Button from "@material-ui/core/Button";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [register, setRegister] = useState(false);
   const [roles, setRoles] = useState([]);
-  const [isAuth, setIsAuth] = useState(localStorage.getItem("token"));
+  const [isAuth] = useState(localStorage.getItem("token"));
   console.log("roles", roles);
   let history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
@@ -20,11 +21,18 @@ export default function Login() {
   const handleSubmit = async () => {
     setLoading(true);
     const res = await login(email, password);
-    setLoading(false);
-    history.push("/home");
     if (res.status === 200) {
-      enqueueSnackbar("Login successfully !");
-    } else enqueueSnackbar(res.response.data.message);
+      setLoading(false);
+      history.push("/home");
+      enqueueSnackbar("Login successfully !", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(res.response.data.message, {
+        variant: "error",
+      });
+      setLoading(false);
+    }
   };
 
   const handleChange = (event) => {
@@ -36,11 +44,18 @@ export default function Login() {
   const handleRegister = async () => {
     setLoading(true);
     const res = await Register(email, password, roles);
-    setLoading(false);
-    setRegister(false);
     if (res.status === 201) {
-      enqueueSnackbar("Register successfully !");
-    } else enqueueSnackbar(res.response.data.message);
+      setLoading(false);
+      setRegister(false);
+      enqueueSnackbar("Register successfully !", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(res.response.data.message, {
+        variant: "error",
+      });
+      setLoading(false);
+    }
   };
   if (isAuth) {
     return <Redirect to="/home" />;
@@ -64,7 +79,7 @@ export default function Login() {
                 />
               </div>
               {email.trim().length === 0 && (
-                <p style={{ color: "red", fontSize: 12 }}>Enter email</p>
+                <span style={{ color: "red", fontSize: 12 }}>Enter email</span>
               )}
               <div className="form__input">
                 <i className="fas fa-unlock-alt" />
@@ -77,15 +92,19 @@ export default function Login() {
                 />
               </div>
               {password.trim().length === 0 && (
-                <p style={{ color: "red", fontSize: 12 }}>Enter password</p>
+                <span style={{ color: "red", fontSize: 12 }}>
+                  Enter password
+                </span>
               )}
-              <button
-                className="login--button"
+              <Button
                 onClick={handleSubmit}
                 disabled={loading}
+                className="login--button"
+                variant="contained"
+                color="primary"
               >
                 LOGIN
-              </button>
+              </Button>
               <p className="forgot__link">
                 Forgot
                 <button className="forgot-button" href="#">
@@ -116,7 +135,7 @@ export default function Login() {
                 />
               </div>
               {email.trim().length === 0 && (
-                <p style={{ color: "red", fontSize: 12 }}>Enter email</p>
+                <span style={{ color: "red", fontSize: 12 }}>Enter email</span>
               )}
               <div className="form__input">
                 <i className="fas fa-unlock-alt" />
@@ -129,16 +148,11 @@ export default function Login() {
                 />
               </div>
               {password.trim().length === 0 && (
-                <p style={{ color: "red", fontSize: 12 }}>Enter password</p>
+                <span style={{ color: "red", fontSize: 12 }}>
+                  Enter password
+                </span>
               )}
-              <div
-                style={{
-                  margin: "10px 0",
-                  //    display: "flex",
-                  //    alignItems: "center",
-                  //    justifyContent: "space-around",
-                }}
-              >
+              <div style={{ margin: "10px 0" }}>
                 <InputLabel htmlFor="age-native-simple">Role</InputLabel>
                 <Select
                   native
@@ -154,13 +168,15 @@ export default function Login() {
                   <option value="USER">User</option>
                 </Select>
               </div>
-              <button
-                className="login--button"
+              <Button
                 onClick={handleRegister}
                 disabled={loading}
+                className="login--button"
+                variant="contained"
+                color="primary"
               >
                 REGISTER
-              </button>
+              </Button>
             </div>
             <div
               className="create__container"

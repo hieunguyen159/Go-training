@@ -6,8 +6,6 @@ import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import "./home.css";
 import sendMailApi from "../../api/mails";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,8 +19,6 @@ const useStyles = makeStyles((theme) => ({
 
 var socket = new WebSocket("ws://localhost:8080/ws");
 export default function App() {
-  let history = useHistory();
-
   const [email, setEmail] = useState("");
   const [receiver, setReceiver] = useState([""]);
   const [loading, setLoading] = useState(false);
