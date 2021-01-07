@@ -99,7 +99,6 @@ export default function App() {
     setReceiver(inputField);
   };
 
- 
   return (
     <div className="App">
       <Fab
@@ -112,10 +111,9 @@ export default function App() {
       </Fab>
       <div className="from--area">
         <h1>Send Email</h1>
-        <p>
-          <label>Enter your email: </label>
-        </p>
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <p style={{ textAlign: "left" }}>Enter your email:</p>
+
+        <div style={{ display: "flex", alignItems: "center", margin: 10 }}>
           <input
             style={{ padding: 10 }}
             onChange={(e) => setEmail(e.target.value)}

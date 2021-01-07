@@ -28,9 +28,10 @@ export const toggleUser = async (id, status) => {
       }
     );
     console.log(res);
-    // return res.data;
+    return res;
   } catch (e) {
     console.log("error", { e });
+    return e;
   }
 };
 
@@ -47,8 +48,9 @@ export const setRolesUser = async (id, roles) => {
       }
     );
     console.log(res.data);
-    return res.data;
+    return res;
   } catch (e) {
     console.log("error", e);
+    return e;
   }
 };

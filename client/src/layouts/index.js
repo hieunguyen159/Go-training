@@ -58,11 +58,11 @@ export default function Layouts() {
               Dashboard
             </Typography>
             <div className={classes.navbarEle}>
-              <Link to="users" target="_top">
-                <Button color="inherit">Users</Button>
-              </Link>
               <Link to="emails" target="_top">
                 <Button color="inherit">Emails</Button>
+              </Link>
+              <Link to="users" target="_top">
+                <Button color="inherit">Users</Button>
               </Link>
             </div>
             <Button

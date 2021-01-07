@@ -13,6 +13,7 @@ export default function Users() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
   return (
     <div className="table-root">
       {users && (

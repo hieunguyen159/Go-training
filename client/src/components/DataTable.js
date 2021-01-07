@@ -18,7 +18,9 @@ import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import AddBoxRoundedIcon from "@material-ui/icons/AddBoxRounded";
+import Chip from "@material-ui/core/Chip";
 import Checkbox from "../components/Checkbox";
+import { useSnackbar } from "notistack";
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
@@ -42,10 +44,12 @@ export default function DataTable(props) {
   const loading = props.loading;
   const classes = useStyles();
   const fetchUsers = props.fetchUsers;
+  const { enqueueSnackbar } = useSnackbar();
   const [activeLoading, setActiveLoading] = useState(false);
   const [rolesArr, setRolesArr] = useState([]);
-  const [open, setOpen] = React.useState(false);
-  console.log(rolesArr);
+  const [open, setOpen] = useState(false);
+  const [userId, setUserId] = useState(null);
+
   const addRoles = ({ value, checked }) => {
     const newRoles = [...rolesArr];
     if (checked) {
@@ -56,28 +60,47 @@ export default function DataTable(props) {
       setRolesArr(newUncheckedRoles);
     }
   };
-  const handleOpen = () => {
+  const handleOpen = (id) => {
+    setUserId(id);
     setOpen(true);
+    setRolesArr([]);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setRolesArr([]);
   };
   const activeUser = async (id, active) => {
     const toggleStatus = !active;
+    const status = toggleStatus ? "ACTIVE" : "INACTIVE";
     setActiveLoading(true);
-    console.log(id, active, toggleStatus);
-    await toggleUser(id, toggleStatus);
-    setActiveLoading(false);
-    fetchUsers();
+    const res = await toggleUser(id, toggleStatus);
+    if (res.status === 200) {
+      setActiveLoading(false);
+      fetchUsers();
+      enqueueSnackbar(`This user is ${status} now`);
+    } else enqueueSnackbar(res.response.data.message);
   };
 
   const setRoles = async (id, roles) => {
     setActiveLoading(true);
     console.log(id, roles);
-    await setRolesUser(id, roles);
-    setActiveLoading(false);
-    fetchUsers();
+    const res = await setRolesUser(id, roles);
+    if (res.status === 200) {
+      setActiveLoading(false);
+      fetchUsers();
+      enqueueSnackbar(`This user is ${roles} now`);
+    } else enqueueSnackbar("Something's wrong, try again later");
+  };
+  const setRolesArray = async () => {
+    setActiveLoading(true);
+    const res = await setRolesUser(userId, rolesArr);
+    if (res.status === 200) {
+      setActiveLoading(false);
+      fetchUsers();
+      setOpen(false);
+      enqueueSnackbar("Set roles to this user successfully !");
+    } else enqueueSnackbar("Something's wrong, try again later");
   };
 
   return (
@@ -110,7 +133,13 @@ export default function DataTable(props) {
                     <TableCell align="center">{row.id}</TableCell>
                     <TableCell align="center">{row.email}</TableCell>
                     <TableCell align="center">
-                      {row.roles.map((item) => item)}
+                      {row.roles.map((item, index) => (
+                        <Chip
+                          style={{ margin: "0 10px" }}
+                          key={index}
+                          label={item}
+                        />
+                      ))}
                       {row.roles.includes("ADMIN") ? (
                         <Tooltip title="Down to User">
                           <IconButton
@@ -132,7 +161,7 @@ export default function DataTable(props) {
                       )}
                       <Tooltip title="Add roles">
                         <IconButton
-                          onClick={() => setOpen(true)}
+                          onClick={() => handleOpen(row.id)}
                           aria-label="add"
                         >
                           <AddBoxRoundedIcon color="secondary" />
@@ -188,7 +217,7 @@ export default function DataTable(props) {
                               disabled={activeLoading}
                               variant="contained"
                               color="secondary"
-                              onClick={() => setRoles(row.id, rolesArr)}
+                              onClick={setRolesArray}
                             >
                               OK
                             </Button>

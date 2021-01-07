@@ -5,12 +5,14 @@ import { useSnackbar } from "notistack";
 import { useHistory } from "react-router-dom";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
+import { Redirect } from "react-router-dom";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [register, setRegister] = useState(false);
   const [roles, setRoles] = useState([]);
+  const [isAuth, setIsAuth] = useState(localStorage.getItem("token"));
   console.log("roles", roles);
   let history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
@@ -40,6 +42,9 @@ export default function Login() {
       enqueueSnackbar("Register successfully !");
     } else enqueueSnackbar(res.response.data.message);
   };
+  if (isAuth) {
+    return <Redirect to="/home" />;
+  }
   return (
     <div className="root">
       <div className="form__area">
