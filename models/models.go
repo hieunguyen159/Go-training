@@ -1,6 +1,12 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"html"
+	"strings"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type Cube struct {
 	Currency string  `xml:"currency,attr" bson:"currency" json:"currency"`
@@ -44,7 +50,37 @@ type Email struct {
 	Status   string             `json:"status" bson:"status"`
 	Reminded bool               `json:"reminded" bson:"reminded"`
 }
+type LoggedInUser struct {
+	Email    string   `json:"email" bson:"email"`
+	Password string   `json:"password" bson:"password"`
+	Roles    []string `json:"roles" bson:"roles"`
+}
+type User struct {
+	ID       primitive.ObjectID `json:"id" bson:"_id"`
+	Email    string             `json:"email" bson:"email"`
+	Password string             `json:"password" bson:"password"`
+	Roles    []string           `json:"roles" bson:"roles"`
+	Active   bool               `json:"active" bson:"active"`
+}
+type Response struct {
+	Token string `json:"token"`
+}
+type Status struct {
+	Status bool `json:"status" bson:"status"`
+}
+type Role struct {
+	Roles []string `json:"roles" bson:"roles"`
+}
 
+func NewUserBson(e User) User {
+	return User{
+		ID:       primitive.NewObjectID(),
+		Email:    e.Email,
+		Password: e.Password,
+		Roles:    e.Roles,
+		Active:   true,
+	}
+}
 func NewEmailBSon(e string) Email {
 	return Email{
 		ID:       primitive.NewObjectID(),
@@ -53,4 +89,16 @@ func NewEmailBSon(e string) Email {
 		Reminded: true,
 	}
 
+}
+
+func Hash(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+func CheckPasswordHash(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+func Santize(data string) string {
+	data = html.EscapeString(strings.TrimSpace(data))
+	return data
 }
