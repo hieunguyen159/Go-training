@@ -4,7 +4,6 @@ import (
 	models "api/models"
 	"context"
 	"encoding/xml"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -54,5 +53,4 @@ func AddDataDaily() {
 		}
 	}
 	cubeCollection.InsertOne(context.Background(), dataDaily)
-	fmt.Println("Adding data...")
 }
