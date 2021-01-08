@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetXMLfile() {
+func GetXMLfile() error {
 	resp, err := http.Get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml")
 	if err != nil {
 		log.Println(err)
@@ -26,7 +26,12 @@ func GetXMLfile() {
 			ui = t
 		}
 	}
-	Connector.InsertOne(context.Background(), ui)
+	_, err = Connector.InsertOne(context.Background(), ui)
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 func AddDataDaily() {
 	resp, err := http.Get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml")
