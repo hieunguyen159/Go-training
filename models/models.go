@@ -8,6 +8,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Time struct {
+	Time string `json:"time"`
+}
+
 type Cube struct {
 	Currency string  `xml:"currency,attr" bson:"currency" json:"currency"`
 	Rate     float64 `xml:"rate,attr" bson:"rate" json:"rate"`
@@ -17,20 +21,9 @@ type Cubes struct {
 	Time  string `xml:"time,attr" bson:"time"`
 	Cubes []Cube `xml:"Cube" bson:"Cube"`
 }
-
-type BigCube struct {
-	BigCube []Cubes `xml:"Cube"`
-}
-type Envelope struct {
-	Envelope BigCube `xml:"Cube"`
-}
 type DateCube struct {
 	Date  string             `json:"time"`
 	Rates map[string]float64 `json:"rates"`
-}
-
-type Time struct {
-	Time string
 }
 
 type ValuePerCurrency struct {
@@ -39,7 +32,12 @@ type ValuePerCurrency struct {
 	MaxPerCurrency     float64 `bson:"max" json:"maxPerCurrency"`
 	AveragePerCurrency float64 `bson:"avg" json:"averagePerCurrency"`
 }
-
+type BigCube struct {
+	BigCube []Cubes `xml:"Cube"`
+}
+type Envelope struct {
+	Envelope BigCube `xml:"Cube"`
+}
 type Form struct {
 	Email    string   `json:"email"`
 	Receiver []string `json:"receiver"`

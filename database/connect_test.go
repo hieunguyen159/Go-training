@@ -6,11 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConnectionSuccess(t *testing.T) {
-	var cubesConnector = ConnectCubes()
-	assert.NotEqual(t, nil, cubesConnector)
-	var emailsConnector = ConnectEmails()
-	assert.NotEqual(t, nil, emailsConnector)
-	var usersConnector = ConnectUsers()
-	assert.NotEqual(t, nil, usersConnector)
+func TestInitDBSuccess(t *testing.T) {
+	// err := godotenv.Load()
+	// assert.Equal(t, nil, err)
+	cubesColDB := NewCollectionDB("Cube")
+	assert.NotEqual(t, nil, cubesColDB.c)
 }
