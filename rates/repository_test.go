@@ -27,9 +27,15 @@ func (u *RepositoryMock) RatesAnalyze() (*[]ValuePerCurrency, error) {
 func TestLatestRates(t *testing.T) {
 	t.Run("Test get latest rates success", func(t *testing.T) {
 		t.Parallel()
-		mockMap := make(map[string]float64)
-		models := RatesResponse{Date: "2020-09-29", Rates: mockMap}
-		mocked := new(RepositoryMock)
-		mocked.On("Insert", models)
+		// mocked := new(RepositoryMock)
+		// m := NewMockRepository(mocked)
+
+		// app := RepositoryMock{Mock: mocked}
+
+		// _, err := app.LatestRates()
+
+		// assert.Error(t, err)
+		// assert.Equal(t, nil, err)
+
 	})
 }
