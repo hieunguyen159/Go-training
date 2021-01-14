@@ -7,39 +7,34 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type Repository struct {
+	DB *mongo.Collection
+}
+
 type MockCollectionInterface interface {
-	Find(query interface{}) error
+	Find(query interface{}) (interface{}, error)
 	Aggregate(filter interface{}) (interface{}, error)
-	LatestRates() (*RatesResponse, error)
-	DateRates(date string) (*RatesResponse, error)
-	RatesAnalyze() (*[]ValuePerCurrency, error)
 }
-
-type MockRepository struct {
-	DB MockCollectionInterface
+type MockCollection struct {
 }
-
-// func NewMockRepository(DB interface{}) MockCollectionInterface {
-// 	// return &MockRepository{DB}
-// 	return &MockRepository{DB}
-// }
-func Find(query interface{}) error {
-	return nil
-}
-
-func Aggregate(filter interface{}) error {
-	return nil
-}
-
 type RepositoryInterface interface {
 	LatestRates() (*RatesResponse, error)
 	DateRates(date string) (*RatesResponse, error)
 	RatesAnalyze() (*[]ValuePerCurrency, error)
 }
+type MockRepository struct {
+	DB MockCollectionInterface
+}
 
-// Repository struct
-type Repository struct {
-	DB *mongo.Collection
+func NewMockRepository(DB interface{}) RepositoryInterface {
+	mockRepository := &MockRepository{DB}
+	return mockRepository
+}
+func (p *MockRepository) Find(query interface{}) (interface{}, error) {
+	return "", nil
+}
+func (p *MockRepository) Aggregate(filter interface{}) (interface{}, error) {
+	return "", nil
 }
 
 func NewRepository(DB *mongo.Collection) RepositoryInterface {
